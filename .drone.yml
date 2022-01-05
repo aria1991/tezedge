@@ -2105,8 +2105,8 @@ steps:
 
 depends_on:
   - build-tezedge-binaries
-  - corr/octez-python-tests-applied-to-tezedge-010-granada
   - corr/octez-python-tests-applied-to-tezedge-011-hangzhou
+  - corr/octez-python-tests-applied-to-tezedge-012-ithaca
 
 ##############################################################################################################
 # This pipeline runs tezedge node with sandbox configuration with 006 Carthage protocol
@@ -6547,8 +6547,8 @@ depends_on:
   - corr/sandbox-launcher-rpc-server-010-granada
   - corr/sandbox-launcher-rpc-server-011-hangzhou
   - corr/tezedge-with-octez-baker-endorser-010-granada
-  - corr/octez-python-tests-applied-to-tezedge-010-granada
   - corr/octez-python-tests-applied-to-tezedge-011-hangzhou
+  - corr/octez-python-tests-applied-to-tezedge-012-ithaca
   - corr/octez-tezedge-connection-with-different-networks-each
   - corr/tezedge-octez-rpcs-and-indexers-compatibility-007-delphinet
   - corr/tezedge-octez-rpcs-and-indexers-compatibility-008-edo2net
@@ -6650,8 +6650,8 @@ depends_on:
   - corr/sandbox-launcher-rpc-server-010-granada
   - corr/sandbox-launcher-rpc-server-011-hangzhou
   - corr/tezedge-with-octez-baker-endorser-010-granada
-  - corr/octez-python-tests-applied-to-tezedge-010-granada
   - corr/octez-python-tests-applied-to-tezedge-011-hangzhou
+  - corr/octez-python-tests-applied-to-tezedge-012-ithaca
   - corr/octez-tezedge-connection-with-different-networks-each
   - corr/tezedge-octez-rpcs-and-indexers-compatibility-007-delphinet
   - corr/tezedge-octez-rpcs-and-indexers-compatibility-008-edo2net
