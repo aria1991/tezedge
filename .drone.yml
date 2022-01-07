@@ -59,7 +59,7 @@ workspace:
 steps:
 
 - name: build-artifacts
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   user: root
   environment:
@@ -1903,7 +1903,7 @@ steps:
       - 'drone-cache' # <- builds a cache from this directory
 
 - name: prepare-python-tests
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   user: root
   environment:
@@ -1928,7 +1928,7 @@ steps:
     - cp drone-cache/build_files/ffi/sapling-output.params tezos-src/tezos/
 
 - name: baker-endorser-test
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   # TODO - TE-707 - Stop ignoring after implmeneting proto alpha handlers
   failure: ignore
@@ -1943,7 +1943,7 @@ steps:
     - poetry run pytest -s --log-dir=$log_dir tests$${TEST_PROTO_DIR_SUFFIX}/test_baker_endorser.py
 
 - name: test-many-nodes
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   # TODO - TE-707 - Stop ignoring after implmeneting proto alpha handlers
   failure: ignore
@@ -1958,7 +1958,7 @@ steps:
     - poetry run pytest -s --log-dir=$log_dir tests$${TEST_PROTO_DIR_SUFFIX}/test_many_nodes.py
 
 - name: mempool-test
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   # TODO - TE-707 - Stop ignoring after implmeneting proto alpha handlers
   failure: ignore
@@ -1973,7 +1973,7 @@ steps:
     - poetry run pytest -s --log-dir=$log_dir tests$${TEST_PROTO_DIR_SUFFIX}/test_mempool.py
 
 - name: fork-test
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   # TODO - TE-707 - Stop ignoring after implmeneting proto alpha handlers
   failure: ignore
@@ -1989,7 +1989,7 @@ steps:
     - poetry run pytest -s --log-dir=$log_dir tests$${TEST_PROTO_DIR_SUFFIX}/test_fork.py
 
 - name: double-endorsement-test
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   # TODO - TE-707 - Stop ignoring after implmeneting proto alpha handlers
   failure: ignore
@@ -2005,7 +2005,7 @@ steps:
     - poetry run pytest -s --log-dir=$log_dir tests$${TEST_PROTO_DIR_SUFFIX}/test_double_endorsement.py
 
 - name: test-programs
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   # TODO - TE-707 - Stop ignoring after implmeneting proto alpha handlers
   failure: ignore
@@ -2020,7 +2020,7 @@ steps:
     - poetry run pytest -s --log-dir=$log_dir tests$${TEST_PROTO_DIR_SUFFIX}/test_programs.py
 
 - name: test-many-bakers
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   # TODO - TE-707 - Stop ignoring after implmeneting proto alpha handlers
   failure: ignore
@@ -2035,7 +2035,7 @@ steps:
     - poetry run pytest -s --log-dir=$log_dir tests$${TEST_PROTO_DIR_SUFFIX}/test_many_bakers.py
 
 - name: test-contract-baker-test
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   # TODO - TE-707 - Stop ignoring after implmeneting proto alpha handlers
   failure: ignore
@@ -2050,7 +2050,7 @@ steps:
     - poetry run pytest -s --log-dir=$log_dir tests$${TEST_PROTO_DIR_SUFFIX}/test_contract_baker.py
 
 - name: test-contract-annotations-test
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   # TODO - TE-707 - Stop ignoring after implmeneting proto alpha handlers
   failure: ignore
@@ -2065,7 +2065,7 @@ steps:
     - poetry run pytest -s --log-dir=$log_dir tests$${TEST_PROTO_DIR_SUFFIX}/test_contract_annotations.py
 
 - name: basic-test
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   # TODO: TE-275 remove failure: ignore
   # TODO - TE-220 - stop ignoring after resolving the rpc error handling
