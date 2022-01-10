@@ -131,6 +131,8 @@ steps:
     - mkdir -p drone-cache/python-tests/launchers
     - mkdir -p drone-cache/python-tests/tools
     - cp -r ./tezos/python-tests/daemons/node.py drone-cache/python-tests/daemons/node.py
+    - cp -r ./tezos/python-tests/daemons/baker.py drone-cache/python-tests/daemons/baker.py
+    - cp -r ./tezos/python-tests/daemons/endorser.py drone-cache/python-tests/daemons/endorser.py
     - cp -r ./tezos/python-tests/launchers/sandbox.py drone-cache/python-tests/launchers/sandbox.py
     - cp -r ./tezos/python-tests/tools/constants.py drone-cache/python-tests/tools/constants.py
 
@@ -1034,6 +1036,8 @@ steps:
     - cp -R /home/appuser/tezos-src/tezos tezos-src/tezos
     # prepare modified python files for tests (compatibility with tezedge node)
     - cp drone-cache/python-tests/daemons/node.py tezos-src/tezos/tests_python/daemons/node.py
+    - cp drone-cache/python-tests/daemons/baker.py tezos-src/tezos/tests_python/daemons/baker.py
+    - cp drone-cache/python-tests/daemons/endorser.py tezos-src/tezos/tests_python/daemons/endorser.py
     - cp drone-cache/python-tests/launchers/sandbox.py tezos-src/tezos/tests_python/launchers/sandbox.py
     - cp drone-cache/python-tests/tools/constants.py tezos-src/tezos/tests_python/tools/constants.py
     - cp drone-cache/sandbox_files/sandbox-patch-context.json tezos-src/tezos/sandbox-patch-context.json
@@ -1476,6 +1480,8 @@ steps:
     - cp -R /home/appuser/tezos-src/tezos tezos-src/tezos
     # prepare modified python files for tests (compatibility with tezedge node)
     - cp drone-cache/python-tests/daemons/node.py tezos-src/tezos/tests_python/daemons/node.py
+    - cp drone-cache/python-tests/daemons/baker.py tezos-src/tezos/tests_python/daemons/baker.py
+    - cp drone-cache/python-tests/daemons/endorser.py tezos-src/tezos/tests_python/daemons/endorser.py
     - cp drone-cache/python-tests/launchers/sandbox.py tezos-src/tezos/tests_python/launchers/sandbox.py
     - cp drone-cache/python-tests/tools/constants.py tezos-src/tezos/tests_python/tools/constants.py
     - cp drone-cache/sandbox_files/sandbox-patch-context.json tezos-src/tezos/sandbox-patch-context.json
@@ -1916,6 +1922,8 @@ steps:
     - cp -R /home/appuser/tezos-src/tezos tezos-src/tezos
     # prepare modified python files for tests (compatibility with tezedge node)
     - cp drone-cache/python-tests/daemons/node.py tezos-src/tezos/tests_python/daemons/node.py
+    - cp drone-cache/python-tests/daemons/baker.py tezos-src/tezos/tests_python/daemons/baker.py
+    - cp drone-cache/python-tests/daemons/endorser.py tezos-src/tezos/tests_python/daemons/endorser.py
     - cp drone-cache/python-tests/launchers/sandbox.py tezos-src/tezos/tests_python/launchers/sandbox.py
     - cp drone-cache/python-tests/tools/constants.py tezos-src/tezos/tests_python/tools/constants.py
     - cp drone-cache/sandbox_files/sandbox-patch-context.json tezos-src/tezos/sandbox-patch-context.json
