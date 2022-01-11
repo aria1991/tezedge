@@ -2760,7 +2760,7 @@ steps:
 
 # run empty tezedge node and wait for it
 - name: tezedge-node-sandbox-granada-run
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   user: root
   detach: true
@@ -2786,7 +2786,7 @@ steps:
 # run empty octez sandbox and wait for it
 - name: octez-node-sandbox-granada-run
   user: root
-  image: tezos/tezos:v9-release
+  image: tezos/tezos:v12.0-rc1
   detach: true
   volumes:
     - name: sandbox-data
@@ -2794,7 +2794,7 @@ steps:
   commands:
     - ip -o -4 addr show | awk -F '[ /]+' '/global/ {print $4}' > /data/sandbox/octez_ip.txt
     - mkdir -p /home/tezos/data/
-    - tezos-node config init --network sandbox --data-dir /home/tezos/data/ --net-addr 0.0.0.0:9732 --rpc-addr 0.0.0.0:8732 --expected-pow 0.0 --connections 1
+    - tezos-node config init --network sandbox --data-dir /home/tezos/data/ --net-addr 0.0.0.0:9732 --rpc-addr 0.0.0.0:8732 --allow-all-rpc 0.0.0.0:8732 --expected-pow 0.0 --connections 1
     - tezos-node identity generate 0.0 --data-dir /home/tezos/data/
     - tezos-node run --network sandbox --data-dir /home/tezos/data/ --sandbox /data/sandbox/sandbox-patch-context.json --no-bootstrap-peers --singleprocess --synchronisation-threshold 0 -vv
 
@@ -2807,7 +2807,7 @@ steps:
 # connect both nodes with tezos-admin-client
 - name: connect-octez-and-tezedge
   user: root
-  image: tezos/tezos:v9-release
+  image: tezos/tezos:v12.0-rc1
   volumes:
     - name: sandbox-data
       path: /data/sandbox
@@ -2820,7 +2820,7 @@ steps:
 # inject protocol to octez node, means it creates the first block with level 1
 - name: inject-first-block-with-tezos_client
   user: root
-  image: tezos/tezos:v9-release
+  image: tezos/tezos:v12.0-rc1
   volumes:
     - name: sandbox-data
       path: /data/sandbox
@@ -2857,7 +2857,7 @@ steps:
 # transfer / inject operation into tezedge node, means it injects operations which is spread throught the p2p to other peers
 - name: do-transfer-with-tezos_client
   user: root
-  image: tezos/tezos:v9-release
+  image: tezos/tezos:v12.0-rc1
   volumes:
     - name: sandbox-data
       path: /data/sandbox
@@ -2886,7 +2886,7 @@ steps:
 
 - name: run-tezos-endorser-010-PtGRANAD
   user: root
-  image: tezos/tezos:v11-release
+  image: tezos/tezos:v12.0-rc1
   volumes:
     - name: sandbox-data
       path: /data/sandbox
@@ -2916,7 +2916,7 @@ steps:
 
 - name: run-tezos-baker-010-PtGRANAD
   user: root
-  image: tezos/tezos:v11-release
+  image: tezos/tezos:v12.0-rc1
   volumes:
     - name: sandbox-data
       path: /data/sandbox
@@ -2937,7 +2937,7 @@ steps:
 
 # compare all rpc's from blocks 0 to 2 between defined nodes
 - name: rpc-test-for-levels-0-2
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   user: root
   environment:
@@ -2953,7 +2953,7 @@ steps:
 
 # compare all rpc's from blocks 0 to <current_head_of_tezedge> between defined nodes, because baker still generates new blocks
 - name: rpc-test-for-levels-0-current_head_of_tezedge-1_run
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   user: root
   environment:
@@ -2974,7 +2974,7 @@ steps:
 
 # compare all rpc's from blocks 0 to <current_head_of_tezedge> between defined nodes, because baker still generates new blocks
 - name: rpc-test-for-levels-0-current_head_of_tezedge-2_run
-  image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+  image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
   pull: if-not-exists
   user: root
   environment:
