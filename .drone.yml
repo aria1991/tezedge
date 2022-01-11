@@ -2392,7 +2392,7 @@ steps:
         - 'drone-cache' # <- builds a cache from this directory
 
   - name: tezedge-sandbox-run
-    image: tezedge/tezedge-ci-builder:rust-1.58.1-v11.0-octez
+    image: tezedge/tezedge-ci-builder:rust-1.57-v12.0-rc1-octez
     pull: if-not-exists
     user: root
     detach: true
