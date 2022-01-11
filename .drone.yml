@@ -4169,8 +4169,8 @@ name: corr/indexer-tz-tezos-009-florence
 
 trigger:
   branch:
-    - develop
-    - master
+    - xdevelop
+    - xmaster
 
 clone:
   disable: true
@@ -4238,8 +4238,8 @@ name: corr/indexer-tz-tezedge-009-florence
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 environment:
   NETWORK: florencenet
@@ -4363,8 +4363,8 @@ name: corr/indexer-conseil-octez-009-florence
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 clone:
   disable: true
@@ -4465,8 +4465,8 @@ name: corr/indexer-conseil-tezedge-009-florence
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 environment:
   NETWORK: florencenet
@@ -4620,8 +4620,8 @@ name: corr/indexer-tzkt-octez-009-florence
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 clone:
   disable: true
@@ -4708,8 +4708,8 @@ name: corr/indexer-tzkt-tezedge-009-florence
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 environment:
   NETWORK: florencenet
