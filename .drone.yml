@@ -167,8 +167,8 @@ name: build-old-tezedge-binaries
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
   ref:
     - refs/pull/*/head
 
@@ -2890,7 +2890,7 @@ steps:
       path: /data/sandbox
   commands:
     - client_data_dir="/data/sandbox/tezos-client"
-    - tezos-endorser-011-PtHangz2 -A `cat /data/sandbox/tezedge_ip.txt` -P 18732 --log-requests --base-dir $client_data_dir -l run bootstrap1 --endorsement-delay 1 &
+    - tezos-endorser-011-PtHangz2 -m json -A `cat /data/sandbox/tezedge_ip.txt` -P 18732 --log-requests --base-dir $client_data_dir -l run bootstrap1 --endorsement-delay 1 &
     - sleep 3
 
 - name: check-endorsements-in-mempools
@@ -2922,8 +2922,8 @@ steps:
     - tezos-admin-client -A `cat /data/sandbox/octez_ip.txt` -P 8732 connect address `cat /data/sandbox/tezedge_ip.txt`:9732
     - context_path="/data/sandbox/tezedge/tezos-node"
     - client_data_dir="/data/sandbox/tezos-client"
-    - tezos-baker-011-PtHangz2 -A `cat /data/sandbox/tezedge_ip.txt` -P 18732 --log-requests --base-dir $client_data_dir run with local node $context_path bootstrap2 &
-    - tezos-admin-client -A `cat /data/sandbox/octez_ip.txt` -P 8732 connect address `cat /data/sandbox/tezedge_ip.txt`:9732
+    - tezos-baker-011-PtHangz2 -m json -A `cat /data/sandbox/tezedge_ip.txt` -P 18732 --log-requests --base-dir $client_data_dir run with local node $context_path bootstrap2 &
+    - tezos-admin-client -m json -A `cat /data/sandbox/octez_ip.txt` -P 8732 connect address `cat /data/sandbox/tezedge_ip.txt`:9732
     - sleep 1
 
 # test checks if this block is synchronized to tezedge node through p2p
