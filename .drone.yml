@@ -496,8 +496,8 @@ name: corr/tezedge-unit-tests
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 workspace:
   path: /drone/src
@@ -579,8 +579,8 @@ name: corr/tezedge-integration-tests
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 workspace:
   path: /drone/src
@@ -815,8 +815,8 @@ name: corr/replay-009-florence
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 environment:
   NETWORK: florencenet
@@ -988,11 +988,15 @@ volumes:
 kind: pipeline
 name: corr/octez-python-tests-applied-to-tezedge-011-hangzhou
 
+trigger:
+  branch:
+    - master
+    - develop
+
 environment:
   TEST_PROTO_DIR_SUFFIX: _011
   PYTHON_LOGS_SERVER_ADDRESS: 65.21.119.66
   PYTHON_LOGS_SERVER_PATH: /sftp-data/tezedgeci/upload/tezedge
-
 
 steps:
 
@@ -1413,11 +1417,6 @@ steps:
       - success
       - failure
 
-trigger:
-  branch:
-    - master
-    - develop
-
 depends_on:
   - build-tezedge-binaries
 
@@ -1432,11 +1431,15 @@ depends_on:
 kind: pipeline
 name: corr/octez-python-tests-applied-to-tezedge-012-ithaca
 
+trigger:
+  branch:
+    - master
+    - develop
+
 environment:
   TEST_PROTO_DIR_SUFFIX: _012
   PYTHON_LOGS_SERVER_ADDRESS: 65.21.119.66
   PYTHON_LOGS_SERVER_PATH: /sftp-data/tezedgeci/upload/tezedge
-
 
 steps:
 
@@ -1837,11 +1840,6 @@ steps:
       - success
       - failure
 
-trigger:
-  branch:
-    - master
-    - develop
-
 depends_on:
   - build-tezedge-binaries
 
@@ -1858,8 +1856,8 @@ name: corr/octez-python-tests-applied-to-tezedge-alpha
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 environment:
   TEST_PROTO_DIR_SUFFIX: _alpha
@@ -5185,8 +5183,8 @@ name: perf/tezedge-all-benchmarks
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 workspace:
   path: /drone/src
@@ -5453,8 +5451,8 @@ name: perf/dynamic-memory-allocation-decoding
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 workspace:
   path: /drone/src
@@ -5494,8 +5492,8 @@ name: perf/bootstrap-time-009-florence
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -5771,8 +5769,8 @@ name: perf/wrk-tests-007-delphinet
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 clone:
   disable: true
@@ -6028,8 +6026,8 @@ name: perf/wrk-tests-009-florence
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 clone:
   disable: true
@@ -6272,8 +6270,8 @@ depends_on:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 volumes:
   - name: snapshots
