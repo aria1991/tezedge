@@ -260,7 +260,7 @@ pub const COMPONENT_IMPLEMENTATION_MAX_LENGTH: usize = 1024 * 100;
 pub const BLOCK_HEADER_FITNESS_ELEMENTS: usize = 2;
 
 /// Maximal length of a `fitness` element.
-pub const BLOCK_HEADER_FITNESS_ELEMENT_LENGTH: usize = 8;
+pub const BLOCK_HEADER_FITNESS_ELEMENT_LENGTH: usize = 64;
 
 /// Maximal size of fitness.
 ///
