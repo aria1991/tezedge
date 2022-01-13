@@ -3,7 +3,7 @@
 
 use crate::{
     OCamlApplyBlockRequest, OCamlBeginApplicationRequest, OCamlBeginConstructionRequest,
-    OCamlBlockHeader, OCamlBlockHeaderShellHeader, OCamlComputePathRequest,
+    OCamlBlockHeader, OCamlBlockHeaderShellHeader, OCamlBlockPayloadHash, OCamlComputePathRequest,
     OCamlContextGetKeyFromHistoryRequest, OCamlContextGetKeyValuesByPrefixRequest,
     OCamlContextGetTreeByPrefixRequest, OCamlCycleRollsOwnerSnapshot, OCamlGenesisChain,
     OCamlGenesisResultDataParams, OCamlHelpersPreapplyBlockRequest, OCamlInitProtocolContextParams,
@@ -24,8 +24,8 @@ use super::{
     OCamlRpcMethod, OCamlTezosContextTezEdgeStorageConfiguration, TaggedHash,
 };
 use crypto::hash::{
-    BlockHash, BlockMetadataHash, ChainId, ContextHash, Hash, OperationHash, OperationListListHash,
-    OperationMetadataHash, OperationMetadataListListHash, ProtocolHash,
+    BlockHash, BlockMetadataHash, BlockPayloadHash, ChainId, ContextHash, Hash, OperationHash,
+    OperationListListHash, OperationMetadataHash, OperationMetadataListListHash, ProtocolHash,
 };
 use ocaml_interop::{
     impl_to_ocaml_polymorphic_variant, impl_to_ocaml_record, impl_to_ocaml_variant,
@@ -91,6 +91,7 @@ to_ocaml_hash!(OCamlBlockHash, BlockHash);
 to_ocaml_hash!(OCamlContextHash, ContextHash);
 to_ocaml_hash!(OCamlProtocolHash, ProtocolHash);
 to_ocaml_hash!(OCamlBlockMetadataHash, BlockMetadataHash);
+to_ocaml_hash!(OCamlBlockPayloadHash, BlockPayloadHash);
 to_ocaml_hash!(OCamlOperationMetadataHash, OperationMetadataHash);
 to_ocaml_hash!(
     OCamlOperationMetadataListListHash,
