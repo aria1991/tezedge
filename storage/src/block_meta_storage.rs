@@ -265,9 +265,7 @@ impl BlockMetaStorageReader for BlockMetaStorage {
                         distance = rest;
                     }
                 } else {
-                    // TODO: is this really correct? it is the behavior we want when
-                    // querying HEAD~N, but maybe not in other situations.
-                    return Ok(Some(block_hash)); // reached genesis
+                    return Ok(None); // reached genesis
                 }
             }
         }

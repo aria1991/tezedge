@@ -693,9 +693,10 @@ pub(crate) fn parse_block_hash(
         {
             Some(block_hash) => block_hash,
             None => {
-                return Err(RpcServiceError::NoDataFoundError {
-                    reason: format!("Unknown block for block_id_param: {}", block_id_param),
-                });
+                env.tezos_environment().genesis_header_hash().unwrap() // TODO
+                //return Err(RpcServiceError::NoDataFoundError {
+                //    reason: format!("Unknown block for block_id_param: {}", block_id_param),
+                //});
             }
         }
     } else {
