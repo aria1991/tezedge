@@ -262,3 +262,13 @@ NODE_PARAMS = ['--sandbox-patch-context-json-file', paths.TEZOS_HOME + 'sandbox-
                # zcash-params files used for init, if zcash-params is not correctly setup it in OS
                '--init-sapling-spend-params-file', paths.TEZOS_HOME + 'sapling-spend.params',
                '--init-sapling-output-params-file', paths.TEZOS_HOME + 'sapling-output.params']
+
+TENDERBAKE_BAKER_LOG_LEVELS = {"alpha.baker.*": "debug"}
+
+TENDERBAKE_NODE_LOG_LEVELS = {
+    "node.chain_validator": "debug",
+    "node.validator.block": "debug",
+    "node_prevalidator": "debug",
+    "validator.block": "debug",
+    "validator.chain": "debug",
+}
