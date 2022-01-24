@@ -519,8 +519,8 @@ pub fn default_networks() -> HashMap<TezosEnvironment, TezosEnvironmentConfigura
 
     env.insert(TezosEnvironment::Ithacanet, TezosEnvironmentConfiguration {
         genesis: GenesisChain {
-            time: "2021-12-22T15:00:00Z".to_string(),
-            block: "BLockGenesisGenesisGenesisGenesisGenesis39287dcHsWn".to_string(),
+            time: "2022-01-25T15:00:00Z".to_string(),
+            block: "BLockGenesisGenesisGenesisGenesisGenesis1db77eJNeJ9".to_string(),
             protocol: "Ps9mPmXaRzmzk35gbAYNCAw6UXdE2qoABTHbN2oEEc1qM7CwT9P".to_string(),
         },
         bootstrap_lookup_addresses: vec![
@@ -529,12 +529,12 @@ pub fn default_networks() -> HashMap<TezosEnvironment, TezosEnvironmentConfigura
             "ithacanet.kaml.fr".to_string(),
             "ithacanet.boot.ecadinfra.com".to_string(),
         ],
-        version: "TEZOS_ITHACANET_2021-12-22T15:00:00Z".to_string(),
+        version: "TEZOS_ITHACANET_2022-01-25T15:00:00Z".to_string(),
         protocol_overrides: ProtocolOverrides {
             user_activated_upgrades: vec![
                 (
                     8191_i32,
-                    "PsiThaCaT47Zboaw71QWScM8sXeMM7bbQFncK9FLqYc6EKdpjVP".to_string(),
+                    "Psithaca2MLRFYargivpo7YvUr7wUDqyxrdhC5CQq78mRvimz6A".to_string(),
                 ),
             ],
             user_activated_protocol_overrides: vec![],

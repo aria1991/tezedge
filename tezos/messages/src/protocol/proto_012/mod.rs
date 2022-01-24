@@ -7,4 +7,4 @@ pub mod operation;
 pub mod rights;
 pub mod votes;
 
-pub const PROTOCOL_HASH: &str = "PsiThaCaT47Zboaw71QWScM8sXeMM7bbQFncK9FLqYc6EKdpjVP";
+pub const PROTOCOL_HASH: &str = "Psithaca2MLRFYargivpo7YvUr7wUDqyxrdhC5CQq78mRvimz6A";
