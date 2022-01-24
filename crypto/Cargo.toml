@@ -16,6 +16,7 @@ p256 = "0.9"
 rand = "0.7.3"
 sodiumoxide = "=0.2.6"
 serde = { version = "1.0", features = ["derive"] }
+zeroize = { version = "1.5" }
 
 [dev-dependencies]
 serde_json = "1.0"
