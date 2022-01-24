@@ -91,8 +91,8 @@ HANGZHOU_FOLDER = "proto_011_PtHangz2"
 HANGZHOU_PARAMETERS = get_parameters(HANGZHOU_FOLDER)
 
 ITHACA = "Psithaca2MLRFYargivpo7YvUr7wUDqyxrdhC5CQq78mRvimz6A"
-ITHACA_DAEMON = "012-PsiThaCa"
-ITHACA_FOLDER = "proto_012_PsiThaCa"
+ITHACA_DAEMON = "012-Psithaca"
+ITHACA_FOLDER = "proto_012_Psithaca"
 ITHACA_PARAMETERS = get_parameters(ITHACA_FOLDER)
 
 TEZOS_CRT = """
