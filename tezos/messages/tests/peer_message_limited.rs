@@ -85,6 +85,9 @@ fn get_contents(
             HashType::SeedEd25519 => "SeedEd25519",
             HashType::Ed25519Signature => "Ed25519Signature",
             HashType::Signature => "Signature",
+            HashType::BlockPayloadHash => "BlockPayloadHash",
+            HashType::CycleNonceHash => "CycleNonceHash",
+            HashType::OperationListHash => "OperationListHash",
         }
         .into(),
         Encoding::Sized(size, encoding) => {

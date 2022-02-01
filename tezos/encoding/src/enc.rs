@@ -260,6 +260,8 @@ encode_hash!(crypto::hash::PublicKeyEd25519);
 encode_hash!(crypto::hash::PublicKeySecp256k1);
 encode_hash!(crypto::hash::PublicKeyP256);
 encode_hash!(crypto::hash::Signature);
+encode_hash!(crypto::hash::BlockPayloadHash);
+encode_hash!(crypto::hash::CycleNonceHash);
 
 pub fn sized<T>(
     size: usize,

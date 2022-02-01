@@ -30,6 +30,7 @@ pub mod proto_008_2;
 pub mod proto_009;
 pub mod proto_010;
 pub mod proto_011;
+pub mod proto_012;
 
 lazy_static! {
     pub static ref SUPPORTED_PROTOCOLS: HashMap<String, SupportedProtocol> = init();
@@ -58,6 +59,7 @@ pub enum SupportedProtocol {
     Proto009,
     Proto010,
     Proto011,
+    // Proto012,
 }
 
 impl SupportedProtocol {
