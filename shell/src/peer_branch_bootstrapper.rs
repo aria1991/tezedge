@@ -232,19 +232,37 @@ impl PeerBranchBootstrapper {
         } = self;
 
         // schedule missing blocks for download
+        let t = Instant::now();
         bootstrap_state.schedule_blocks_to_download(&filter_peer, log);
+        let schedule_blocks_to_download_t = t.elapsed();
 
         // schedule missing operations for download
+        let t = Instant::now();
         bootstrap_state.schedule_operations_to_download(&filter_peer, log);
+        let schedule_operations_to_download_t = t.elapsed();
 
         // schedule downloaded blocks for block application
+        let t = Instant::now();
         bootstrap_state.schedule_blocks_for_apply(&filter_peer, log);
+        let schedule_blocks_for_apply_t = t.elapsed();
 
         // try to fire latest block for application (if possible)
+        let t = Instant::now();
         bootstrap_state.try_call_apply_block(chain_id, chain_manager, &ctx.myself);
+        let try_call_apply_block_t = t.elapsed();
 
         // check, if we completed any pipeline
+        let t = Instant::now();
         bootstrap_state.check_bootstrapped_branches(&Some(filter_peer), log);
+        let check_bootstrapped_branches_t = t.elapsed();
+
+        debug!(log, "Branch bootstrapping process started";
+               "schedule_blocks_to_download_t" => format!("{:?}", schedule_blocks_to_download_t),
+               "schedule_operations_to_download_t" => format!("{:?}", schedule_operations_to_download_t),
+               "schedule_blocks_for_apply_t" => format!("{:?}", schedule_blocks_for_apply_t),
+               "try_call_apply_block_t" => format!("{:?}", try_call_apply_block_t),
+               "check_bootstrapped_branches_t" => format!("{:?}", check_bootstrapped_branches_t),
+        );
     }
 }
 
@@ -369,7 +387,7 @@ impl Receive<StartBranchBootstraping> for PeerBranchBootstrapper {
         }
 
         // add new branch (if possible)
-        let timer = Instant::now();
+        let t = Instant::now();
         let result = self.bootstrap_state.add_new_branch(
             msg.peer_id.clone(),
             msg.peer_queues,
@@ -378,13 +396,17 @@ impl Receive<StartBranchBootstraping> for PeerBranchBootstrapper {
             msg.to_level,
             &log,
         );
+        let add_new_branch_t = t.elapsed();
 
         // process
+        let t = Instant::now();
         self.process_bootstrap_pipelines(msg.peer_id.clone(), ctx, &log);
+        let process_bootstrap_pipelines_t = t.elapsed();
 
         if let AddBranchState::Added(was_merged) = result {
             debug!(log, "Branch bootstrapping process started";
-                       "started_in" => format!("{:?}", timer.elapsed()),
+                       "add_new_branch_t" => format!("{:?}", add_new_branch_t),
+                       "process_bootstrap_pipelines_t" => format!("{:?}", process_bootstrap_pipelines_t),
                        "to_level" => msg.to_level,
                        "new_branch" => if was_merged { "merged" } else { "created" },
                        "peer_ip" => msg.peer_id.address.to_string(),

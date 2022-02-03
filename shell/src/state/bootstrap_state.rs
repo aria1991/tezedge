@@ -462,6 +462,7 @@ impl BootstrapState {
                     break;
                 }
                 branch.collect_next_block_headers_to_download(
+                    log,
                     available_queue_capacity,
                     &already_queued,
                     &mut missing_blocks,
@@ -789,6 +790,7 @@ impl BranchState {
     /// This finds block, which should be downloaded first and refreshes state for all touched blocks
     pub fn collect_next_block_headers_to_download(
         &mut self,
+        log: &Logger,
         requested_count: usize,
         ignored_blocks: &HashSet<BlockRef>,
         blocks_to_download: &mut Vec<BlockRef>,
@@ -825,6 +827,7 @@ impl BranchState {
 
             // shift and find next missing predecessor
             let (missing_block, applied_block) = interval.shift_and_find_next_missing_predecessor(
+                log,
                 &mut self.missing_operations,
                 block_state_db,
                 data_requester,
@@ -1189,6 +1192,7 @@ impl BranchInterval {
 
     fn shift_and_find_next_missing_predecessor(
         &mut self,
+        log: &Logger,
         missing_block_operations: &mut HashSet<BlockRef>,
         block_state_db: &BlockStateDb,
         data_requester: &DataRequester,
@@ -1200,6 +1204,7 @@ impl BranchInterval {
 
         // find the last known predecessor for stop block or genesis
         let (oldest_known_predecessor, newest_applied_found) = find_last_known_predecessor(
+            log,
             &self.seek,
             &self.start,
             missing_block_operations,
@@ -1357,6 +1362,7 @@ impl BranchInterval {
 ///     1. option block_hash + bool, bool means can close interval and there is no need to iterate it to start
 ///     2. option block_hash, applied block found, we dont need to continue
 fn find_last_known_predecessor(
+    log: &Logger,
     block_from: &BlockRef,
     block_to: &BlockRef,
     missing_operations: &mut HashSet<BlockRef>,
@@ -1420,13 +1426,23 @@ fn find_last_known_predecessor(
 
     // find in loop known predecessor
     let mut predecessor_selector = Some(predecessor_selector);
+    let t = Instant::now();
+    let mut iterations = 0;
+    let finish = |t: Instant, iterations| {
+        slog::debug!(log, "find_last_known_predecessor_iter";
+            "iterations" => iterations,
+            "duration" => format!("{:?}", t.elapsed()));
+    };
     while let Some(block) = predecessor_selector {
+        iterations += 1;
         // check if we can close interval from cache
         if block_state_db.blocks.contains_key(&block) {
+            finish(t, iterations);
             return (Some((block_state_db.get_block_ref(block), true)), None);
         }
 
         if block_to.as_ref().eq(&block) {
+            finish(t, iterations);
             return (Some((block_state_db.get_block_ref(block), true)), None);
         }
 
@@ -1434,6 +1450,7 @@ fn find_last_known_predecessor(
         match data_requester.block_meta_storage.get(&block) {
             Ok(Some(block_metadata)) => {
                 if block_metadata.is_applied() {
+                    finish(t, iterations);
                     // if block is already applied, we finish, there is no need to continue
                     return (
                         Some((block_state_db.get_block_ref(block.clone()), true)),
@@ -1442,6 +1459,7 @@ fn find_last_known_predecessor(
                 }
 
                 if !block_metadata.is_downloaded() {
+                    finish(t, iterations);
                     return (Some((block_state_db.get_block_ref(block), false)), None);
                 } else {
                     // check missing operations
@@ -1456,6 +1474,7 @@ fn find_last_known_predecessor(
                     match block_metadata.take_predecessor() {
                         Some(predecessor) => {
                             if predecessor.eq(&block) {
+                                finish(t, iterations);
                                 // stop on genesis
                                 return (
                                     Some((block_state_db.get_block_ref(predecessor), true)),
@@ -1465,6 +1484,7 @@ fn find_last_known_predecessor(
                             predecessor_selector = Some(predecessor)
                         }
                         None => {
+                            finish(t, iterations);
                             // should not happen, once predecessor will not be Option, it will be removed
                             return (Some((block_state_db.get_block_ref(block), false)), None);
                         }
@@ -1472,11 +1492,13 @@ fn find_last_known_predecessor(
                 }
             }
             _ => {
+                finish(t, iterations);
                 // if any problem or not found, we try to download the header
                 return (Some((block_state_db.get_block_ref(block), false)), None);
             }
         }
     }
+    finish(t, iterations);
 
     (None, None)
 }
