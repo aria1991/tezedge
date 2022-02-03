@@ -10,7 +10,7 @@ edition = "2018"
 thiserror = "1.0"
 serde = { version = "1.0", features = ["derive", "rc"] }
 slog = { version = "2.7", features = ["max_level_trace", "release_max_level_debug"] }
-tokio = { version = "1.12", features = ["full"] }
+tokio = { version = "1.15", features = ["full", "tracing"] }
 nix = "0.23"
 # local dependencies
 async_ipc = { path = "../../async-ipc" }
