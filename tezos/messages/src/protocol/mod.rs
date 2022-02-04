@@ -59,7 +59,7 @@ pub enum SupportedProtocol {
     Proto009,
     Proto010,
     Proto011,
-    // Proto012,
+    Proto012,
 }
 
 impl SupportedProtocol {
@@ -78,6 +78,7 @@ impl SupportedProtocol {
             SupportedProtocol::Proto009 => proto_009::PROTOCOL_HASH.to_string(),
             SupportedProtocol::Proto010 => proto_010::PROTOCOL_HASH.to_string(),
             SupportedProtocol::Proto011 => proto_011::PROTOCOL_HASH.to_string(),
+            SupportedProtocol::Proto012 => proto_012::PROTOCOL_HASH.to_string(),
         }
     }
 }
@@ -218,6 +219,10 @@ pub fn get_constants_for_rpc(
             let mut param = ParametricConstants::from_bytes(bytes)?.as_map();
             param.extend(FIXED.clone().as_map());
             Ok(Some(param))
+        }
+        SupportedProtocol::Proto012 => {
+            // TODO(vlad):
+            Ok(None)
         }
     }
 }

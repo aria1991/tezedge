@@ -252,6 +252,7 @@ pub(crate) async fn check_and_get_baking_rights(
         )
         .await
         .map_err(RightsError::from),
+        SupportedProtocol::Proto012 => todo!("vlad"),
     }
 }
 
@@ -421,6 +422,7 @@ pub(crate) async fn check_and_get_endorsing_rights(
         )
         .await
         .map_err(RightsError::from),
+        SupportedProtocol::Proto012 => todo!("vlad"),
     }
 }
 
@@ -558,6 +560,12 @@ pub(crate) async fn get_votes_listings(
         }
         SupportedProtocol::Proto011 => {
             proto_011::votes_service::get_votes_listings(env, &context_hash).await
+        }
+        SupportedProtocol::Proto012 => {
+            // TODO(vlad):
+            Err(VotesError::UnsupportedProtocolRpc {
+                protocol: supported_protocol.protocol_hash(),
+            })
         }
     }
 }
@@ -1016,6 +1024,7 @@ pub fn get_blocks_per_cycle(
             serialized_constants,
         )?
         .blocks_per_cycle()),
+        SupportedProtocol::Proto012 => todo!("vlad"),
     }
 }
 
