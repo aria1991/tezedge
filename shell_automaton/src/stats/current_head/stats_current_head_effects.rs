@@ -13,7 +13,6 @@ use tezos_messages::{
 };
 
 use crate::{
-    block_applier::BlockApplierApplyState,
     current_head_precheck::CurrentHeadPrecheckSuccessAction,
     peer::message::write::{
         PeerMessageWriteErrorAction, PeerMessageWriteInitAction, PeerMessageWriteSuccessAction,
@@ -240,14 +239,11 @@ where
                 });
         }
 
-        Action::BlockApplierApplySuccess(_) => {
+        Action::CurrentHeadUpdate(content) => {
             if !store.state.get().is_bootstrapped() {
                 return;
             }
-            let block = match &store.state().block_applier.current {
-                BlockApplierApplyState::Success { block, .. } => block,
-                _ => return,
-            };
+            let block = &content.new_head;
 
             let current_block_hash = block.hash.clone();
             let level = block.header.level();
