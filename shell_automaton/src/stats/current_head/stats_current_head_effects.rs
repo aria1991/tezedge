@@ -14,7 +14,7 @@ use tezos_messages::{
 
 use crate::{
     block_applier::BlockApplierApplyState,
-    current_head::current_head_actions::CurrentHeadPrecheckSuccessAction,
+    current_head_precheck::CurrentHeadPrecheckSuccessAction,
     peer::message::write::{
         PeerMessageWriteErrorAction, PeerMessageWriteInitAction, PeerMessageWriteSuccessAction,
     },

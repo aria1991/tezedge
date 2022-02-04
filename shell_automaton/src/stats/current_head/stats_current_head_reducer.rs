@@ -54,7 +54,7 @@ pub fn stats_current_head_reducer(state: &mut crate::State, action: &crate::Acti
             baker,
             priority,
         }) => {
-            let level = if let Some(level) = state.current_heads.candidate_level() {
+            let level = if let Some(level) = state.current_head_candidate_level() {
                 level
             } else {
                 return;

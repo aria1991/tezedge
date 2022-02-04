@@ -16,7 +16,7 @@ use crate::block_applier::{
     BlockApplierApplyStoreApplyResultPendingAction, BlockApplierApplyStoreApplyResultSuccessAction,
     BlockApplierApplySuccessAction, BlockApplierEnqueueBlockAction,
 };
-use crate::current_head::current_head_actions::*;
+use crate::current_head_precheck::*;
 use crate::event::{P2pPeerEvent, P2pServerEvent, WakeupEvent};
 use crate::State;
 
@@ -453,7 +453,6 @@ pub enum Action {
     CurrentHeadPrecheckSuccess(CurrentHeadPrecheckSuccessAction),
     CurrentHeadPrecheckRejected(CurrentHeadPrecheckRejectedAction),
     CurrentHeadError(CurrentHeadErrorAction),
-    CurrentHeadApply(CurrentHeadApplyAction),
     CurrentHeadPrecacheBakingRights(CurrentHeadPrecacheBakingRightsAction),
 
     StatsCurrentHeadReceived(StatsCurrentHeadReceivedAction),

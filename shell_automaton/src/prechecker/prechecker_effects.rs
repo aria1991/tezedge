@@ -9,11 +9,8 @@ use tezos_messages::{p2p::binary_message::BinaryWrite, protocol::SupportedProtoc
 
 use crate::{
     block_applier::BlockApplierApplyState,
-    current_head::{
-        current_head_actions::{
-            CurrentHeadPrecheckRejectedAction, CurrentHeadPrecheckSuccessAction,
-        },
-        CurrentHeadState,
+    current_head_precheck::{
+        CurrentHeadPrecheckRejectedAction, CurrentHeadPrecheckSuccessAction, CurrentHeadState,
     },
     mempool::mempool_actions::MempoolOperationDecodedAction,
     prechecker::{
@@ -152,25 +149,19 @@ where
                 if disable_endorsements_precheck || !is_endorsement {
                     store.dispatch(PrecheckerProtocolNeededAction { key: key.clone() });
                 } else if disable_block_precheck {
-                    match &store.state().block_applier.current {
-                        BlockApplierApplyState::Success {
-                            block: current_block,
-                            ..
-                        } => {
-                            if &current_block.hash == &block {
-                                store.dispatch(PrecheckerGetEndorsingRightsAction {
-                                    key: key.clone(),
-                                });
-                            } else if Some(current_block.header.level() + 1) == endorsement_level {
-                                store.dispatch(PrecheckerWaitForBlockAppliedAction {
-                                    key: key.clone(),
-                                    branch: block,
-                                });
-                            }
-                        }
-                        _ => {}
+                    let (hash, header) = match store.state().get_current_head() {
+                        Some(v) => v,
+                        None => return,
+                    };
+                    if hash == &block {
+                        store.dispatch(PrecheckerGetEndorsingRightsAction { key: key.clone() });
+                    } else if Some(header.level() + 1) == endorsement_level {
+                        store.dispatch(PrecheckerWaitForBlockAppliedAction {
+                            key: key.clone(),
+                            branch: block,
+                        });
                     }
-                } else if store.state.get().current_heads.current_level() == endorsement_level {
+                } else if store.state.get().current_head_level() == endorsement_level {
                     store.dispatch(PrecheckerWaitForBlockPrecheckedAction {
                         key: key.clone(),
                         branch: block,
@@ -627,10 +618,8 @@ where
 fn endorsement_branch_is_valid(state: &State, branch: &BlockHash) -> Option<bool> {
     if state.current_heads.candidates.is_empty() {
         state
-            .current_heads
-            .applied_heads
-            .last()
-            .map(|l| &l.block_hash == branch)
+            .current_head_hash()
+            .map(|head_hash| head_hash == branch)
     } else {
         match state.current_heads.candidates.get(branch) {
             Some(CurrentHeadState::Prechecked { .. }) => Some(true),

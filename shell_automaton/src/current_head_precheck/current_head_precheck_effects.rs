@@ -7,16 +7,15 @@ use crypto::hash::BlockHash;
 use tezos_messages::p2p::{binary_message::MessageHash, encoding::peer::PeerMessage};
 
 use crate::{
-    block_applier::BlockApplierApplyState,
     peer::message::read::PeerMessageReadSuccessAction,
     rights::{rights_actions::RightsGetAction, RightsKey},
     stats::current_head::stats_current_head_actions::StatsCurrentHeadReceivedAction,
     Action,
 };
 
-use super::{current_head_actions::*, BakingPriorityError, CurrentHeadState};
+use super::*;
 
-pub fn current_head_effects<S>(store: &mut crate::Store<S>, action: &crate::ActionWithMeta)
+pub fn current_head_precheck_effects<S>(store: &mut crate::Store<S>, action: &crate::ActionWithMeta)
 where
     S: crate::Service,
 {
@@ -48,24 +47,6 @@ where
                 address: *address,
                 block_hash,
                 block_header: current_block_header.clone(),
-            });
-        }
-        Action::BlockApplierApplySuccess(_) => {
-            if !store.state.get().is_bootstrapped() {
-                return;
-            }
-            let block = match &store.state().block_applier.current {
-                BlockApplierApplyState::Success { block, .. } => block,
-                _ => return,
-            };
-
-            let block_hash = block.hash.clone();
-            let level = block.header.level();
-            let timestamp = block.header.timestamp();
-            store.dispatch(CurrentHeadApplyAction {
-                block_hash,
-                level,
-                timestamp,
             });
         }
 
@@ -112,24 +93,16 @@ where
             slog::error!(&store.state().log, "current head error"; "block_hash" => block_hash.to_base58_check(), "error" => error.to_string());
         }
 
-        Action::CurrentHeadApply(CurrentHeadApplyAction { .. }) => {
+        Action::BlockApplierApplySuccess(_) => {
             store.dispatch(CurrentHeadPrecacheBakingRightsAction {});
         }
         Action::CurrentHeadPrecacheBakingRights(CurrentHeadPrecacheBakingRightsAction {
             ..
         }) => {
-            if let Some((current_block_hash, level, prev_timestamp)) = store
-                .state
-                .get()
-                .current_heads
-                .applied_head()
-                .map(|applied_head| {
-                    (
-                        applied_head.block_hash.clone(),
-                        applied_head.level,
-                        applied_head.timestamp,
-                    )
-                })
+            let state = store.state.get();
+            if let Some((current_block_hash, level, prev_timestamp)) = state
+                .get_current_head()
+                .map(|(hash, header)| (hash.clone(), header.level(), header.timestamp()))
             {
                 let max_priority = match max_priority_to_precache(
                     prev_timestamp,
@@ -168,7 +141,7 @@ fn max_priority_to_precache(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::current_head::current_head_reducer::TIME_BETWEEN_BLOCKS;
+    use crate::current_head_precheck::current_head_precheck_reducer::TIME_BETWEEN_BLOCKS;
 
     #[test]
     fn test_max_priority_to_precache_0() {
