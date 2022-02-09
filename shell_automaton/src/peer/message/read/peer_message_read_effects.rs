@@ -2,10 +2,15 @@
 // SPDX-License-Identifier: MIT
 
 use networking::network_channel::PeerMessageReceived;
+use storage::BlockHeaderWithHash;
 use tezos_messages::p2p::binary_message::BinaryRead;
 use tezos_messages::p2p::encoding::peer::{PeerMessage, PeerMessageResponse};
 use tezos_messages::p2p::encoding::prelude::AdvertiseMessage;
 
+use crate::bootstrap::{
+    BootstrapPeerBlockHeaderReceivedAction, BootstrapPeerBlockOperationsReceivedAction,
+    BootstrapPeerCurrentBranchReceivedAction,
+};
 use crate::peer::binary_message::read::PeerBinaryMessageReadInitAction;
 use crate::peer::message::read::PeerMessageReadErrorAction;
 use crate::peer::message::write::PeerMessageWriteInitAction;
@@ -82,6 +87,64 @@ where
                 PeerMessage::Advertise(msg) => {
                     store.dispatch(PeersAddMultiAction {
                         addresses: msg.id().iter().filter_map(|x| x.parse().ok()).collect(),
+                    });
+                }
+                PeerMessage::CurrentBranch(msg) => {
+                    if msg.chain_id() == &store.state().config.chain_id {
+                        store.dispatch(BootstrapPeerCurrentBranchReceivedAction {
+                            peer: action.address,
+                            current_branch: msg.current_branch().clone(),
+                        });
+                    }
+                }
+                PeerMessage::BlockHeader(msg) => {
+                    let state = store.state.get();
+                    let block = match BlockHeaderWithHash::new(msg.block_header().clone()) {
+                        Ok(v) => v,
+                        Err(err) => {
+                            slog::warn!(&state.log, "Failed to hash BlockHeader";
+                                "peer" => format!("{}", action.address),
+                                "peer_pkh" => format!("{:?}", state.peer_public_key_hash_b58check(action.address)),
+                                "block_header" => format!("{:?}", msg.block_header()));
+                            store.dispatch(PeersGraylistAddressAction {
+                                address: action.address,
+                            });
+                            return;
+                        }
+                    };
+                    if let Some(p) = state
+                        .bootstrap
+                        .peer_interval_by_level(action.address, block.header.level())
+                    {
+                        if !p.is_current_hash_eq(&block.hash) {
+                            slog::warn!(&state.log, "BlockHeader hash didn't match requested hash";
+                                "peer" => format!("{}", action.address),
+                                "peer_pkh" => format!("{:?}", state.peer_public_key_hash_b58check(action.address)),
+                                "block" => format!("{:?}", block),
+                                "expected_hash" => format!("{:?}", p.current));
+                            store.dispatch(PeersGraylistAddressAction {
+                                address: action.address,
+                            });
+                            return;
+                        }
+                        store.dispatch(BootstrapPeerBlockHeaderReceivedAction {
+                            peer: action.address,
+                            block,
+                        });
+                    } else {
+                        slog::warn!(&state.log, "Received unexpected BlockHeader from peer";
+                            "peer" => format!("{}", action.address),
+                            "peer_pkh" => format!("{:?}", state.peer_public_key_hash_b58check(action.address)),
+                            "block_header" => format!("{:?}", msg.block_header()));
+                        store.dispatch(PeersGraylistAddressAction {
+                            address: action.address,
+                        });
+                    }
+                }
+                PeerMessage::OperationsForBlocks(msg) => {
+                    store.dispatch(BootstrapPeerBlockOperationsReceivedAction {
+                        peer: action.address,
+                        message: msg.clone(),
                     });
                 }
                 _ => {}

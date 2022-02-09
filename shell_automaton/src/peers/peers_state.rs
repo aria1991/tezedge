@@ -6,7 +6,7 @@ use std::collections::btree_map::{BTreeMap, Entry as BTreeMapEntry};
 use std::net::{IpAddr, SocketAddr};
 use std::time::Duration;
 
-use crate::peer::{Peer, PeerStatus};
+use crate::peer::{Peer, PeerHandshaked, PeerStatus};
 
 use super::check::timeouts::PeersCheckTimeoutsState;
 use super::dns_lookup::PeersDnsLookupState;
@@ -121,6 +121,19 @@ impl PeersState {
     /// Number of peers that we have established tcp connection with.
     pub fn connected_len(&self) -> usize {
         self.iter().filter(|(_, peer)| peer.is_connected()).count()
+    }
+
+    /// Iterator over handshaked peers.
+    pub fn handshaked_iter<'a>(
+        &'a self,
+    ) -> impl 'a + Iterator<Item = (SocketAddr, &'a PeerHandshaked)> {
+        self.iter()
+            .filter_map(|(addr, peer)| peer.status.as_handshaked().map(|p| (*addr, p)))
+    }
+
+    /// Number of peers that are handshaked
+    pub fn handshaked_len(&self) -> usize {
+        self.handshaked_iter().count()
     }
 
     #[inline(always)]

@@ -28,6 +28,7 @@ use storage::{
 use tezos_api::ffi::{ApplyBlockRequest, ApplyBlockResponse, CommitGenesisResult};
 use tezos_messages::p2p::encoding::block_header::BlockHeader;
 use tezos_messages::p2p::encoding::operation::Operation;
+use tezos_messages::p2p::encoding::operations_for_blocks::OperationsForBlocksMessage;
 
 use crate::request::RequestId;
 use crate::storage::kv_cycle_meta::CycleKey;
@@ -88,7 +89,8 @@ pub enum StorageRequestPayload {
 
     CurrentHeadGet(ChainId),
 
-    BlockHeaderPut(BlockHeaderWithHash),
+    BlockHeaderPut(ChainId, BlockHeaderWithHash),
+    BlockOperationsPut(OperationsForBlocksMessage),
     BlockAdditionalDataPut((BlockHash, BlockAdditionalData)),
 
     PrepareApplyBlockData {
@@ -119,6 +121,7 @@ pub enum StorageResponseSuccess {
     CurrentHeadGetSuccess(BlockHeaderWithHash),
 
     BlockHeaderPutSuccess(bool),
+    BlockOperationsPutSuccess(bool),
     BlockAdditionalDataPutSuccess(()),
 
     PrepareApplyBlockDataSuccess {
@@ -146,6 +149,7 @@ pub enum StorageResponseError {
     CurrentHeadGetError(StorageError),
 
     BlockHeaderPutError(StorageError),
+    BlockOperationsPutError(StorageError),
     BlockAdditionalDataPutError(StorageError),
 
     PrepareApplyBlockDataError(StorageError),
@@ -257,6 +261,7 @@ impl StorageServiceDefault {
         let block_storage = BlockStorage::new(&storage);
         let block_meta_storage = BlockMetaStorage::new(&storage);
         let operations_storage = OperationsStorage::new(&storage);
+        let operations_meta_storage = OperationsMetaStorage::new(&storage);
         let constants_storage = ConstantsStorage::new(&storage);
         let cycle_meta_storage = CycleMetaStorage::new(&storage);
         let cycle_eras_storage = CycleErasStorage::new(&storage);
@@ -358,10 +363,26 @@ impl StorageServiceDefault {
                     }
                 }
 
-                BlockHeaderPut(data) => match block_storage.put_block_header(&data) {
-                    Ok(is_new_block) => Ok(BlockHeaderPutSuccess(is_new_block)),
-                    Err(err) => Err(BlockHeaderPutError(err.into())),
-                },
+                BlockHeaderPut(chain_id, header) => {
+                    match block_storage.put_block_header(&header).and_then(|is_new| {
+                        block_meta_storage
+                            .put_block_header(&header, &chain_id, &log)
+                            .map(move |_| is_new)
+                    }) {
+                        Ok(is_new_block) => Ok(BlockHeaderPutSuccess(is_new_block)),
+                        Err(err) => Err(BlockHeaderPutError(err.into())),
+                    }
+                }
+                BlockOperationsPut(message) => {
+                    match operations_storage
+                        .put_operations(&message)
+                        .and_then(|_| operations_meta_storage.put_operations(&message))
+                        .map(|(is_complete, _)| is_complete)
+                    {
+                        Ok(is_complete) => Ok(BlockOperationsPutSuccess(is_complete)),
+                        Err(err) => Err(BlockOperationsPutError(err.into())),
+                    }
+                }
 
                 BlockAdditionalDataPut((block_hash, data)) => {
                     match block_meta_storage.put_block_additional_data(&block_hash, &data) {
