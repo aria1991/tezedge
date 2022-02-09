@@ -8,6 +8,7 @@ use std::convert::TryFrom;
 
 use crypto::hash::{
     BlockHash, BlockPayloadHash, ContextHash, HashTrait, OperationListListHash, Signature,
+    CycleNonceHash,
 };
 use tezos_encoding::binary_reader::BinaryReaderError;
 use tezos_encoding::{
@@ -229,6 +230,7 @@ pub struct InlinedEndorsementVariant {
 /// See [https://tezos.gitlab.io/shell/p2p_api.html?highlight=p2p%20encodings#alpha-inlined-endorsement-contents-5-bytes-8-bit-tag].
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, HasEncoding, NomReader, BinWriter)]
 #[serde(tag = "kind", rename_all = "lowercase")]
+#[encoding(tags = "u8")]
 pub enum InlinedEndorsementContents {
     /// Preendorsement (tag 20).
     /// See [https://tezos.gitlab.io/shell/p2p_api.html?highlight=p2p%20encodings#endorsement-tag-0].
@@ -274,8 +276,7 @@ pub struct FullHeader {
     pub payload_round: u32,
     #[encoding(sized = "8", bytes)]
     pub proof_of_work_nonce: Vec<u8>,
-    #[encoding(option, sized = "32", bytes)]
-    pub seed_nonce_hash: Option<Vec<u8>>,
+    pub seed_nonce_hash: Option<CycleNonceHash>,
     pub liquidity_baking_escape_vote: bool,
     pub signature: Signature,
 }
