@@ -107,8 +107,7 @@ impl<'de> Deserialize<'de> for Mutez {
                 .map_err(serde::de::Error::custom)
                 .map(Mutez)
         } else {
-            serde::Deserialize::deserialize(deserializer)
-                .map(Mutez)
+            serde::Deserialize::deserialize(deserializer).map(Mutez)
         }
     }
 }

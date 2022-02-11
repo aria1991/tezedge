@@ -6,11 +6,11 @@
 
 use std::convert::TryFrom;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crypto::hash::{
-    BlockHash, ContextHash, ContractTz1Hash, HashTrait, OperationListListHash, ProtocolHash,
-    Signature, ContractKt1Hash,
+    BlockHash, ContextHash, ContractKt1Hash, ContractTz1Hash, HashTrait, OperationListListHash,
+    ProtocolHash, Signature,
 };
 use tezos_encoding::binary_reader::BinaryReaderError;
 use tezos_encoding::types::Mutez;
@@ -517,8 +517,7 @@ impl<'de> Deserialize<'de> for OriginatedContractId {
     {
         let s = String::deserialize(deserializer)?;
         Ok(OriginatedContractId {
-            contract_hash: ContractKt1Hash::from_b58check(&s)
-                .map_err(serde::de::Error::custom)?,
+            contract_hash: ContractKt1Hash::from_b58check(&s).map_err(serde::de::Error::custom)?,
             padding: 0,
         })
     }

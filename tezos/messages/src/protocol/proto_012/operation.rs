@@ -7,8 +7,8 @@
 use std::convert::TryFrom;
 
 use crypto::hash::{
-    BlockHash, BlockPayloadHash, ContextHash, HashTrait, OperationListListHash, Signature,
-    CycleNonceHash,
+    BlockHash, BlockPayloadHash, ContextHash, CycleNonceHash, HashTrait, OperationListListHash,
+    Signature,
 };
 use tezos_encoding::binary_reader::BinaryReaderError;
 use tezos_encoding::{
