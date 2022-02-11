@@ -1,7 +1,7 @@
 // Copyright (c) SimpleStaking, Viable Systems and Tezedge Contributors
 // SPDX-License-Identifier: MIT
 
-use std::{time::Duration, collections::BTreeMap};
+use std::{collections::BTreeMap, time::Duration};
 
 use chrono::{DateTime, Utc};
 
@@ -9,12 +9,17 @@ use redux_rs::ActionWithMeta;
 
 use tezos_messages::{
     p2p::binary_message::BinaryRead,
-    protocol::proto_012::operation::{InlinedEndorsementVariant, InlinedEndorsementContents, Contents},
+    protocol::proto_012::operation::{
+        Contents, InlinedEndorsementContents, InlinedEndorsementVariant,
+    },
 };
 
-use crate::rpc_client::Validator;
+use crate::{rpc_client::Validator, types::ProtocolBlockHeader};
 
-use super::{action::*, state::{State, Config, BlockData, EndorsementUnsignedOperation}};
+use super::{
+    action::*,
+    state::{BlockData, Config, EndorsementUnsignedOperation, State},
+};
 
 pub fn reducer(state: &mut State, action: &ActionWithMeta<Action>) {
     match &action.action {
@@ -45,6 +50,7 @@ pub fn reducer(state: &mut State, action: &ActionWithMeta<Action>) {
                             minimal_block_delay: Duration::from_secs(block_sec),
                             delay_increment_per_round: Duration::from_secs(round_sec),
                         },
+                        predecessor_head_data: None,
                         current_head_data: None,
                     }
                 }
@@ -53,53 +59,67 @@ pub fn reducer(state: &mut State, action: &ActionWithMeta<Action>) {
         }
         // WARNING: for now it is incorrect, new head should not always replace old head
         // need to accumulate rounds and keep predecessor block
-        Action::NewHeadSeen(NewHeadSeenAction { head }) => {
-            match state {
-                State::Ready { current_head_data, .. } => {
-                    *current_head_data = Some(BlockData {
-                        slot: None,
-                        validators: BTreeMap::new(),
-                        level: head.level,
-                        predecessor: head.predecessor.clone(),
+        Action::NewHeadSeen(NewHeadSeenAction { head }) => match state {
+            State::Ready {
+                current_head_data, ..
+            } => {
+                let protocol_data_bytes = hex::decode(&head.protocol_data).unwrap();
+                let protocol_data = ProtocolBlockHeader::from_bytes(protocol_data_bytes).unwrap();
 
-                        block_hash: head.hash.clone(),
-                        timestamp: head.timestamp.parse::<DateTime<Utc>>().unwrap(),
-                        protocol_data: BinaryRead::from_bytes(hex::decode(&head.protocol_data).unwrap()).unwrap(),
+                *current_head_data = Some(BlockData {
+                    predecessor: head.predecessor.clone(),
+                    block_hash: head.hash.clone(),
 
-                        seen_preendorsement: 0,
-                        preendorsement: None,
-                        endorsement: None,
-                    })
-                },
-                _ => return,
+                    slot: None,
+                    validators: BTreeMap::new(),
+                    level: head.level,
+                    round: protocol_data.payload_round,
+                    timestamp: head.timestamp.parse::<DateTime<Utc>>().unwrap(),
+                    payload_hash: protocol_data.payload_hash,
+
+                    seen_preendorsement: 0,
+                    preendorsement: None,
+                    endorsement: None,
+                })
             }
-        }
-        Action::GetSlotsSuccess(GetSlotsSuccessAction { validators, this_delegate }) => {
-            match state {
-                State::Ready { current_head_data: Some(head_data), .. } => {
-                    let mut validators_map = BTreeMap::new();
-                    for Validator { delegate, slots, .. } in validators {
-                        validators_map.insert(delegate.clone(), slots.clone());
-                    }
-                    head_data.slot = validators_map
-                        .get(this_delegate)
-                        .and_then(|v| v.first().cloned());
-                    head_data.validators = validators_map;
-                },
-                _ => return,
+            _ => return,
+        },
+        Action::GetSlotsSuccess(GetSlotsSuccessAction {
+            validators,
+            this_delegate,
+        }) => match state {
+            State::Ready {
+                current_head_data: Some(head_data),
+                ..
+            } => {
+                let mut validators_map = BTreeMap::new();
+                for Validator {
+                    delegate, slots, ..
+                } in validators
+                {
+                    validators_map.insert(delegate.clone(), slots.clone());
+                }
+                head_data.slot = validators_map
+                    .get(this_delegate)
+                    .and_then(|v| v.first().cloned());
+                head_data.validators = validators_map;
             }
-        }
+            _ => return,
+        },
         Action::SignPreendorsement(SignPreendorsementAction {}) => {
             let head_data = match state {
-                State::Ready { current_head_data: Some(v), .. } if !v.slot.is_none() => v,
+                State::Ready {
+                    current_head_data: Some(v),
+                    ..
+                } if !v.slot.is_none() => v,
                 _ => return,
             };
 
             let inlined = InlinedEndorsementVariant {
                 slot: head_data.slot.unwrap(),
                 level: head_data.level,
-                round: head_data.protocol_data.payload_round,
-                block_payload_hash: head_data.protocol_data.payload_hash.clone(),
+                round: head_data.round,
+                block_payload_hash: head_data.payload_hash.clone(),
             };
             head_data.preendorsement = Some(EndorsementUnsignedOperation {
                 branch: head_data.predecessor.clone(),
@@ -108,9 +128,10 @@ pub fn reducer(state: &mut State, action: &ActionWithMeta<Action>) {
         }
         Action::NewOperationSeen(NewOperationSeenAction { operations }) => {
             let block_data = match state {
-                State::Ready { current_head_data: Some(block_data), .. } => {
-                    block_data
-                },
+                State::Ready {
+                    current_head_data: Some(block_data),
+                    ..
+                } => block_data,
                 _ => return,
             };
             let validators = block_data.validators.clone();
@@ -131,15 +152,18 @@ pub fn reducer(state: &mut State, action: &ActionWithMeta<Action>) {
         }
         Action::SignEndorsement(SignEndorsementAction {}) => {
             let head_data = match state {
-                State::Ready { current_head_data: Some(v), .. } if !v.slot.is_none() => v,
+                State::Ready {
+                    current_head_data: Some(v),
+                    ..
+                } if !v.slot.is_none() => v,
                 _ => return,
             };
 
             let inlined = InlinedEndorsementVariant {
                 slot: head_data.slot.unwrap(),
                 level: head_data.level,
-                round: head_data.protocol_data.payload_round,
-                block_payload_hash: head_data.protocol_data.payload_hash.clone(),
+                round: head_data.round,
+                block_payload_hash: head_data.payload_hash.clone(),
             };
             head_data.preendorsement = Some(EndorsementUnsignedOperation {
                 branch: head_data.predecessor.clone(),
