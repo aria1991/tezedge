@@ -255,7 +255,7 @@ async fn process_injected_block(
         .new(slog::o!("block" => block_header_with_hash.hash.to_base58_check(), "chain_id" => chain_id.to_base58_check()));
 
     // this should  allways return [is_new_block==true], as we are injecting a forged new block
-    let (block_metadata, is_new_block, are_operations_complete) =
+    let (_, is_new_block, are_operations_complete) =
         match process_injected_block_header(env, &chain_id, &block_header_with_hash) {
             Ok(data) => data,
             Err(e) => {
