@@ -1,12 +1,7 @@
 // Copyright (c) SimpleStaking, Viable Systems and Tezedge Contributors
 // SPDX-License-Identifier: MIT
 
-use std::sync::Arc;
-
 use serde::Serialize;
-
-use crypto::hash::ChainId;
-use storage::BlockHeaderWithHash;
 
 #[derive(Serialize, Debug)]
 pub struct WorkerStatus {
@@ -29,33 +24,4 @@ pub struct Prevalidator {
     // TODO: missing Tezos fields
     // information
     // pipelines
-}
-
-/// Module which holds all dedicated struct/enums for notifications used by notifiers
-pub mod notifications {
-
-    use super::*;
-
-    #[derive(Debug)]
-    pub struct NewCurrentHeadNotification {
-        pub chain_id: Arc<ChainId>,
-        pub block: Arc<BlockHeaderWithHash>,
-        pub is_bootstrapped: bool,
-    }
-
-    impl NewCurrentHeadNotification {
-        pub fn new(
-            chain_id: Arc<ChainId>,
-            block: Arc<BlockHeaderWithHash>,
-            is_bootstrapped: bool,
-        ) -> Self {
-            Self {
-                chain_id,
-                block,
-                is_bootstrapped,
-            }
-        }
-    }
-
-    pub type NewCurrentHeadNotificationRef = Arc<NewCurrentHeadNotification>;
 }
