@@ -300,6 +300,8 @@ dependencies = [
  "crypto",
  "derive_more",
  "hex",
+ "lazy_static",
+ "nom",
  "redux-rs",
  "reqwest",
  "serde 1.0.130",
