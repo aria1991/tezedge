@@ -80,8 +80,38 @@ impl From<&Zarith> for BigInt {
 has_encoding!(Zarith, ZARITH_ENCODING, { Encoding::Z });
 
 /// Mutez number
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
 pub struct Mutez(pub num_bigint::BigInt);
+
+impl Serialize for Mutez {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        if serializer.is_human_readable() {
+            self.0.to_string().serialize(serializer)
+        } else {
+            self.0.serialize(serializer)
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for Mutez {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        if deserializer.is_human_readable() {
+            String::deserialize(deserializer)?
+                .parse()
+                .map_err(serde::de::Error::custom)
+                .map(Mutez)
+        } else {
+            serde::Deserialize::deserialize(deserializer)
+                .map(Mutez)
+        }
+    }
+}
 
 impl From<num_bigint::BigInt> for Mutez {
     fn from(from: num_bigint::BigInt) -> Self {
