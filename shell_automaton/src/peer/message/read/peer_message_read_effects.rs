@@ -16,6 +16,7 @@ use crate::peer::message::read::PeerMessageReadErrorAction;
 use crate::peer::message::write::PeerMessageWriteInitAction;
 use crate::peer::remote_requests::block_header_get::PeerRemoteRequestsBlockHeaderGetEnqueueAction;
 use crate::peer::remote_requests::block_operations_get::PeerRemoteRequestsBlockOperationsGetEnqueueAction;
+use crate::peer::remote_requests::current_branch_get::PeerRemoteRequestsCurrentBranchGetInitAction;
 use crate::peers::add::multi::PeersAddMultiAction;
 use crate::peers::graylist::PeersGraylistAddressAction;
 use crate::service::actors_service::{ActorsMessageTo, ActorsService};
@@ -91,6 +92,24 @@ where
                         addresses: msg.id().iter().filter_map(|x| x.parse().ok()).collect(),
                     });
                 }
+                PeerMessage::GetCurrentBranch(msg) => {
+                    if msg.chain_id != store.state().config.chain_id {
+                        // TODO: log
+                        return;
+                    }
+                    if !store.dispatch(PeerRemoteRequestsCurrentBranchGetInitAction {
+                        address: action.address,
+                    }) {
+                        let state = store.state();
+                        let current = state
+                            .peers
+                            .get_handshaked(&action.address)
+                            .map(|p| &p.remote_requests.current_branch_get);
+                        slog::debug!(&state.log, "Peer - Too many GetCurrentBranch requests!";
+                                    "peer" => format!("{}", action.address),
+                                    "current" => format!("{:?}", current));
+                    }
+                }
                 PeerMessage::CurrentBranch(msg) => {
                     if msg.chain_id() == &store.state().config.chain_id {
                         store.dispatch(BootstrapPeerCurrentBranchReceivedAction {
@@ -106,7 +125,7 @@ where
                             block_hash: block_hash.clone(),
                         }) {
                             let state = store.state.get();
-                            slog::warn!(&state.log, "Peer - Too many block header requests!";
+                            slog::debug!(&state.log, "Peer - Too many block header requests!";
                                 "peer" => format!("{}", action.address),
                                 "current_requested_block_headers_len" => msg.get_block_headers().len());
                             break;
@@ -120,7 +139,7 @@ where
                             key: key.into(),
                         }) {
                             let state = store.state.get();
-                            slog::warn!(&state.log, "Peer - Too many block operations requests!";
+                            slog::debug!(&state.log, "Peer - Too many block operations requests!";
                                 "peer" => format!("{}", action.address),
                                 "current_requested_block_operations_len" => msg.get_operations_for_blocks().len());
                             break;
