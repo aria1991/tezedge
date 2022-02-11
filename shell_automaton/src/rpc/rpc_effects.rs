@@ -1,6 +1,7 @@
 // Copyright (c) SimpleStaking, Viable Systems and Tezedge Contributors
 // SPDX-License-Identifier: MIT
 
+use crate::block_applier::BlockApplierEnqueueBlockAction;
 use crate::mempool::mempool_actions::{
     MempoolAskCurrentHeadAction, MempoolGetPendingOperationsAction, MempoolOperationInjectAction,
     MempoolRegisterOperationsStreamAction, MempoolRemoveAppliedOperationsAction,
@@ -39,14 +40,32 @@ pub fn rpc_effects<S: Service>(store: &mut Store<S>, action: &ActionWithMeta) {
                 match msg {
                     RpcRequest::GetCurrentGlobalState { channel } => {
                         let _ = channel.send(store.state.get().clone());
+                        store
+                            .service()
+                            .rpc()
+                            .respond(rpc_id, serde_json::Value::Null);
                     }
                     RpcRequest::GetMempoolOperationStats { channel } => {
                         let stats = store.state().mempool.operation_stats.clone();
                         let _ = channel.send(stats);
+                        store
+                            .service()
+                            .rpc()
+                            .respond(rpc_id, serde_json::Value::Null);
                     }
                     RpcRequest::GetBlockStats { channel } => {
                         let stats = store.service().statistics();
                         let _ = channel.send(stats.map(|s| s.block_stats_get_all().clone()));
+                        store
+                            .service()
+                            .rpc()
+                            .respond(rpc_id, serde_json::Value::Null);
+                    }
+                    RpcRequest::InjectBlock { block_hash } => {
+                        store.dispatch(BlockApplierEnqueueBlockAction {
+                            block_hash: block_hash.into(),
+                            injector_rpc_id: Some(rpc_id),
+                        });
                     }
                     RpcRequest::InjectOperation {
                         operation,
@@ -60,9 +79,17 @@ pub fn rpc_effects<S: Service>(store: &mut Store<S>, action: &ActionWithMeta) {
                     }
                     RpcRequest::RequestCurrentHeadFromConnectedPeers => {
                         store.dispatch(MempoolAskCurrentHeadAction {});
+                        store
+                            .service()
+                            .rpc()
+                            .respond(rpc_id, serde_json::Value::Null);
                     }
                     RpcRequest::RemoveOperations { operation_hashes } => {
                         store.dispatch(MempoolRemoveAppliedOperationsAction { operation_hashes });
+                        store
+                            .service()
+                            .rpc()
+                            .respond(rpc_id, serde_json::Value::Null);
                     }
                     RpcRequest::MempoolStatus => match &store.state().mempool.running_since {
                         None => store

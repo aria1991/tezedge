@@ -44,6 +44,9 @@ pub enum RpcRequest {
         channel: oneshot::Sender<Option<crate::service::statistics_service::BlocksStats>>,
     },
 
+    InjectBlock {
+        block_hash: BlockHash,
+    },
     InjectOperation {
         operation_hash: OperationHash,
         operation: Operation,

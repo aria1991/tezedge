@@ -205,16 +205,10 @@ pub fn mempool_reducer(state: &mut State, action: &ActionWithMeta) {
             // TODO: get from protocol
             const TTL: i32 = 120;
 
-            let (chain_id, block) = match &state.block_applier.current {
-                BlockApplierApplyState::Success {
-                    chain_id, block, ..
-                } => (chain_id, block),
+            let block = match &state.block_applier.current {
+                BlockApplierApplyState::Success { block, .. } => block,
                 _ => return,
             };
-
-            if config.chain_id.ne(chain_id) {
-                return;
-            }
 
             let old_head_state = mempool_state.local_head_state.clone();
             mempool_state.branch_changed = old_head_state
