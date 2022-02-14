@@ -7,7 +7,7 @@ use storage::block_meta_storage::Meta;
 use storage::{BlockAdditionalData, BlockHeaderWithHash};
 use tezos_api::ffi::{ApplyBlockError, ApplyBlockRequest, ApplyBlockResponse};
 
-use crypto::hash::{BlockHash, ChainId};
+use crypto::hash::BlockHash;
 
 use crate::request::RequestId;
 use crate::service::rpc_service::RpcId;
