@@ -420,14 +420,25 @@ pub enum Action {
     PeerRemoteRequestsCurrentBranchGetFinish(PeerRemoteRequestsCurrentBranchGetFinishAction),
 
     BootstrapInit(BootstrapInitAction),
+
     BootstrapPeersConnectPending(BootstrapPeersConnectPendingAction),
     BootstrapPeersConnectSuccess(BootstrapPeersConnectSuccessAction),
+
     BootstrapPeersMainBranchFindInit(BootstrapPeersMainBranchFindInitAction),
     BootstrapPeersMainBranchFindPending(BootstrapPeersMainBranchFindPendingAction),
+    BootstrapPeerCurrentBranchReceived(BootstrapPeerCurrentBranchReceivedAction),
     BootstrapPeersMainBranchFindSuccess(BootstrapPeersMainBranchFindSuccessAction),
+
     BootstrapPeersBlockHeadersGetInit(BootstrapPeersBlockHeadersGetInitAction),
     BootstrapPeersBlockHeadersGetPending(BootstrapPeersBlockHeadersGetPendingAction),
+
+    BootstrapPeerBlockHeaderGetInit(BootstrapPeerBlockHeaderGetInitAction),
+    BootstrapPeerBlockHeaderGetPending(BootstrapPeerBlockHeaderGetPendingAction),
+    BootstrapPeerBlockHeaderGetSuccess(BootstrapPeerBlockHeaderGetSuccessAction),
+    BootstrapPeerBlockHeaderGetFinish(BootstrapPeerBlockHeaderGetFinishAction),
+
     BootstrapPeersBlockHeadersGetSuccess(BootstrapPeersBlockHeadersGetSuccessAction),
+
     BootstrapPeersBlockOperationsGetInit(BootstrapPeersBlockOperationsGetInitAction),
     BootstrapPeersBlockOperationsGetPending(BootstrapPeersBlockOperationsGetPendingAction),
     BootstrapPeersBlockOperationsGetNextAll(BootstrapPeersBlockOperationsGetNextAllAction),
@@ -435,13 +446,11 @@ pub enum Action {
     BootstrapPeerBlockOperationsGetPending(BootstrapPeerBlockOperationsGetPendingAction),
     BootstrapPeerBlockOperationsReceived(BootstrapPeerBlockOperationsReceivedAction),
     BootstrapPeerBlockOperationsGetSuccess(BootstrapPeerBlockOperationsGetSuccessAction),
+
     BootstrapScheduleBlocksForApply(BootstrapScheduleBlocksForApplyAction),
     BootstrapScheduleBlockForApply(BootstrapScheduleBlockForApplyAction),
 
     BootstrapPeersBlockOperationsGetSuccess(BootstrapPeersBlockOperationsGetSuccessAction),
-
-    BootstrapPeerCurrentBranchReceived(BootstrapPeerCurrentBranchReceivedAction),
-    BootstrapPeerBlockHeaderReceived(BootstrapPeerBlockHeaderReceivedAction),
 
     Protocol(ProtocolAction),
 

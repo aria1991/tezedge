@@ -8,7 +8,7 @@ use tezos_messages::p2p::encoding::peer::{PeerMessage, PeerMessageResponse};
 use tezos_messages::p2p::encoding::prelude::AdvertiseMessage;
 
 use crate::bootstrap::{
-    BootstrapPeerBlockHeaderReceivedAction, BootstrapPeerBlockOperationsReceivedAction,
+    BootstrapPeerBlockHeaderGetSuccessAction, BootstrapPeerBlockOperationsReceivedAction,
     BootstrapPeerCurrentBranchReceivedAction,
 };
 use crate::peer::binary_message::read::PeerBinaryMessageReadInitAction;
@@ -162,22 +162,23 @@ where
                             return;
                         }
                     };
-                    if let Some(p) = state
+                    if let Some((_, p)) = state
                         .bootstrap
-                        .peer_interval_by_level(action.address, block.header.level())
+                        .peer_interval(action.address, |p| p.current.is_pending())
+                        .filter(|(_, p)| p.current.is_pending_block_hash_eq(&block.hash))
                     {
-                        if !p.is_current_hash_eq(&block.hash) {
-                            slog::warn!(&state.log, "BlockHeader hash didn't match requested hash";
+                        if !p.current.is_pending_block_level_eq(block.header.level()) {
+                            slog::warn!(&state.log, "BlockHeader level didn't match expected level for requested block hash";
                                 "peer" => format!("{}", action.address),
                                 "peer_pkh" => format!("{:?}", state.peer_public_key_hash_b58check(action.address)),
                                 "block" => format!("{:?}", block),
-                                "expected_hash" => format!("{:?}", p.current));
+                                "expected_level" => format!("{:?}", p.current.block_level()));
                             store.dispatch(PeersGraylistAddressAction {
                                 address: action.address,
                             });
                             return;
                         }
-                        store.dispatch(BootstrapPeerBlockHeaderReceivedAction {
+                        store.dispatch(BootstrapPeerBlockHeaderGetSuccessAction {
                             peer: action.address,
                             block,
                         });
