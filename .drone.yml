@@ -4875,7 +4875,7 @@ steps:
     - echo "LD_LIBRARY_PATH - $LD_LIBRARY_PATH"
     - drone-cache/build_files/light-node --config-file "drone-cache/build_files/tezedge/tezedge_drone.config" --disable-bootstrap-lookup --peers $PEERS --peer-thresh-low=3 --peer-thresh-high=5 --identity-file "drone-cache/build_files/identities/identity_4.json" --network "$${NETWORK}" --protocol-runner "/data/cache/protocol-runner" --p2p-port 19732 --init-sapling-spend-params-file drone-cache/build_files/ffi/sapling-spend.params --init-sapling-output-params-file drone-cache/build_files/ffi/sapling-output.params
 
-- name: tezedge-node-bootstrapped-run
+- name: tezos-client-bootstrapped-for-tezedge-node
   user: root
   image: tezos/tezos:v9-release
   detach: true
@@ -4893,7 +4893,7 @@ steps:
 
 # now we have prepared octez and tezedge node, that can run tests - rpc, wrk, indexer-test
 
-- name: bootstrapped-rpc-check:
+- name: bootstrapped-rpc-check
   user: root
   image: tezos/tezos:v9-release
   detach: true
