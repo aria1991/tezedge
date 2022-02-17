@@ -4850,6 +4850,17 @@ steps:
     - tezos-node config reset --data-dir /home/tezos/data --network $${NETWORK} --no-bootstrap-peers
     - tezos-node run --data-dir /home/tezos/data --history-mode archive --rpc-addr 0.0.0.0:8732 --net-addr 0.0.0.0:9734 --network $${NETWORK} --no-bootstrap-peers
 
+- name: octez-node-bootstrapped-run
+  user: root
+  image: tezos/tezos:v9-release
+  detach: true
+  volumes:
+    - name: cache
+      path: /data/cache
+  commands:
+    - tezos-client -E http://octez-node-granadanet-run-1:8732 bootstrapped | tee /data/cache/octez-node-bootstrapped.log
+    - cp /dev/null /data/cache/octez-node-bootstrapped.done
+
 - name: wait-for-octez-snapshoted-nodes
   image: tezedge/tezos-node-bootstrap:latest
   commands:
@@ -4875,12 +4886,38 @@ steps:
     - echo "LD_LIBRARY_PATH - $LD_LIBRARY_PATH"
     - drone-cache/build_files/light-node --config-file "drone-cache/build_files/tezedge/tezedge_drone.config" --disable-bootstrap-lookup --peers $PEERS --peer-thresh-low=3 --peer-thresh-high=5 --identity-file "drone-cache/build_files/identities/identity_4.json" --network "$${NETWORK}" --protocol-runner "/data/cache/protocol-runner" --p2p-port 19732 --init-sapling-spend-params-file drone-cache/build_files/ffi/sapling-spend.params --init-sapling-output-params-file drone-cache/build_files/ffi/sapling-output.params
 
+- name: tezedge-node-bootstrapped-run
+  user: root
+  image: tezos/tezos:v9-release
+  detach: true
+  volumes:
+    - name: cache
+      path: /data/cache
+  commands:
+    - tezos-client -E http:tezedge-updated-node-granadanet-run:18732 bootstrapped | tee /data/cache/tezedge-node-bootstrapped.log
+    - cp /dev/null /data/cache/tezedge-node-bootstrapped.done
+
 - name: bootstrapping-tezedge
   image: tezedge/tezos-node-bootstrap:latest
   commands:
     - tezos-node-bootstrap bootstrap --level=$${TO_BLOCK_HEADER} --nodes $${TEZEDGE_NODE_RPC_CONTEXT_ROOT}
 
 # now we have prepared octez and tezedge node, that can run tests - rpc, wrk, indexer-test
+
+- name: bootstrapped-rpc-check:
+  user: root
+  image: tezos/tezos:v9-release
+  detach: true
+  volumes:
+    - name: cache
+      path: /data/cache
+  commands:
+    - test -f /data/cache/tezedge-node-bootstrapped.done
+    - grep "Waiting for the node to be bootstrapped..." /data/cache/tezedge-node-bootstrapped.log
+    - grep "Node is bootstrapped." /data/cache/tezedge-node-bootstrapped
+    - test -f /data/cache/octez-node-bootstrapped.done
+    - grep "Waiting for the node to be bootstrapped..." /data/cache/octez-node-bootstrapped.log
+    - grep "Node is bootstrapped." /data/cache/octez-node-bootstrapped
 
 # run both indexers on background to fill data
 - name: tz-indexer-granadanet-tezedge
