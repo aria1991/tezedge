@@ -119,10 +119,10 @@ where
                 None => return,
             };
             let message = GetBlockHeadersMessage::new(vec![block_hash]);
-            store.dispatch(dbg!(PeerMessageWriteInitAction {
+            store.dispatch(PeerMessageWriteInitAction {
                 address: content.peer,
                 message: Arc::new(PeerMessage::GetBlockHeaders(message).into()),
-            }));
+            });
             store.dispatch(BootstrapPeerBlockHeaderGetPendingAction { peer: content.peer });
         }
         Action::BootstrapPeerBlockHeaderGetSuccess(content) => {

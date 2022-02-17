@@ -151,10 +151,10 @@ pub fn bootstrap_reducer(state: &mut State, action: &ActionWithMeta) {
                                 peer_intervals.push(PeerIntervalState {
                                     peer,
                                     downloaded: vec![],
-                                    current: PeerIntervalCurrentState::Idle {
+                                    current: PeerIntervalCurrentState::idle(
                                         block_level,
                                         block_hash,
-                                    },
+                                    ),
                                 });
                                 (index, true)
                             },
@@ -177,10 +177,10 @@ pub fn bootstrap_reducer(state: &mut State, action: &ActionWithMeta) {
                                 peer_intervals.push(PeerIntervalState {
                                     peer,
                                     downloaded: interval.downloaded,
-                                    current: PeerIntervalCurrentState::Idle {
+                                    current: PeerIntervalCurrentState::idle(
                                         block_level,
                                         block_hash,
-                                    },
+                                    ),
                                 });
                             }
                             current => {
@@ -255,10 +255,7 @@ pub fn bootstrap_reducer(state: &mut State, action: &ActionWithMeta) {
                             peer_intervals.push(PeerIntervalState {
                                 peer,
                                 downloaded: vec![],
-                                current: PeerIntervalCurrentState::Idle {
-                                    block_level,
-                                    block_hash,
-                                },
+                                current: PeerIntervalCurrentState::idle(block_level, block_hash),
                             });
                         });
                 }
@@ -292,7 +289,7 @@ pub fn bootstrap_reducer(state: &mut State, action: &ActionWithMeta) {
                 Some(v) => v,
                 None => return,
             };
-            let (index, block) = match state
+            let (mut index, block) = match state
                 .bootstrap
                 .peer_interval(content.peer, |p| p.current.is_success())
                 .and_then(|(index, p)| p.current.block().map(|b| (index, b)))
@@ -321,7 +318,14 @@ pub fn bootstrap_reducer(state: &mut State, action: &ActionWithMeta) {
                 // check if we have finished downloading interval or
                 // if this interval reached predecessor. So that
                 // pred_interval_level == current_interval_next_level.
-                if index > 0 {
+                loop {
+                    if index <= 0 {
+                        let pred_level = block.header.level() - 1;
+                        if pred_level <= current_head.header.level() {
+                            peer_intervals[index].current.to_finished();
+                        }
+                        break;
+                    }
                     let pred_index = index - 1;
                     let pred = &peer_intervals[pred_index];
                     match pred
@@ -331,33 +335,57 @@ pub fn bootstrap_reducer(state: &mut State, action: &ActionWithMeta) {
                         .or(pred.current.block_level_with_hash().map(|(l, h)| (l, h)))
                     {
                         Some((pred_level, pred_hash)) => {
-                            if pred_level + 1 == block.header.level() {
-                                if block.header.predecessor() != pred_hash {
-                                    slog::warn!(&state.log, "Predecessor hash mismatch!";
-                                        "block_header" => format!("{:?}", block),
-                                        "pred_interval" => format!("{:?}", peer_intervals.get(pred_index - 1)),
-                                        "interval" => format!("{:?}", pred),
-                                        "next_interval" => format!("{:?}", peer_intervals[index]));
-                                    todo!("log and remove pred interval, update `index -= 1`, somehow trigger blacklisting a peer.");
-                                } else {
-                                    // We finished interval.
-                                    peer_intervals[index].current.to_finished();
+                            // TODO(zura): check if pred_level > block.header.level()
+                            if pred_level + 1 > block.header.level() {
+                                dbg!(&state.bootstrap);
+                                todo!();
+                            }
+                            if pred_level + 1 != block.header.level() {
+                                break;
+                            }
+                            if block.header.predecessor() != pred_hash {
+                                slog::warn!(&state.log, "Predecessor hash mismatch!";
+                                            "block_header" => format!("{:?}", block),
+                                            "pred_interval" => format!("{:?}", peer_intervals.get(pred_index - 1)),
+                                            "interval" => format!("{:?}", pred),
+                                            "next_interval" => format!("{:?}", peer_intervals[index]));
+                                todo!("log and remove pred interval, update `index -= 1`, somehow trigger blacklisting a peer.");
+                            } else {
+                                let pred = &mut peer_intervals[pred_index];
+                                match &pred.current {
+                                    PeerIntervalCurrentState::Disconnected {
+                                        block_level,
+                                        block_hash,
+                                        ..
+                                    } => {
+                                        let pred_downloaded = std::mem::take(&mut pred.downloaded);
+                                        let block_level = block_level.clone();
+                                        let block_hash = block_hash.clone();
+                                        let interval = &mut peer_intervals[index];
+                                        interval.current =
+                                            PeerIntervalCurrentState::idle(block_level, block_hash);
+                                        interval.downloaded.extend(pred_downloaded);
+
+                                        peer_intervals.remove(pred_index);
+                                        index -= 1;
+                                    }
+                                    _ => {
+                                        // We finished interval.
+                                        peer_intervals[index].current.to_finished();
+                                        break;
+                                    }
                                 }
                             }
                         }
                         None => {
                             slog::warn!(&state.log, "Found empty block header download interval when bootstrapping. Should not happen!";
-                                "pred_interval" => format!("{:?}", peer_intervals.get(pred_index - 1)),
-                                "interval" => format!("{:?}", pred),
-                                "next_interval" => format!("{:?}", peer_intervals[index]));
+                                    "pred_interval" => format!("{:?}", peer_intervals.get(pred_index - 1)),
+                                    "interval" => format!("{:?}", pred),
+                                    "next_interval" => format!("{:?}", peer_intervals[index]));
                             peer_intervals.remove(pred_index);
+                            index -= 1;
                         }
                     };
-                } else {
-                    let pred_level = block.header.level() - 1;
-                    if pred_level <= current_head.header.level() {
-                        peer_intervals[index].current.to_finished();
-                    }
                 }
 
                 loop {
@@ -534,7 +562,7 @@ pub fn bootstrap_reducer(state: &mut State, action: &ActionWithMeta) {
 }
 
 fn peer_intervals_cmp_levels(a: &PeerIntervalState, b: &PeerIntervalState) -> std::cmp::Ordering {
-    a.current.block_level().cmp(&b.current.block_level())
+    a.lowest_level().cmp(&b.lowest_level())
 }
 
 fn peer_branch_with_level_iter<'a>(
@@ -555,9 +583,33 @@ fn peer_branch_with_level_iter<'a>(
 
     let level = branch_current_head_level;
 
-    let iter = history.iter().scan((level, step), |(level, step), hash| {
-        *level -= step.next_step();
-        Some((*level, hash.clone()))
-    });
+    let iter = history
+        .iter()
+        .scan((level, step.clone()), |(level, step), hash| {
+            *level -= step.next_step();
+            Some((*level, hash))
+        });
+    let contents = format!(
+        "{}\n{}\n{}\n\n{}\n\n{}",
+        state.config.identity.peer_id().to_base58_check(),
+        peer_pkh.to_base58_check(),
+        format!("{branch_current_head_level} {branch_current_head_hash}"),
+        iter.map(|(level, hash)| format!("{level} {}", hash.to_base58_check()))
+            .collect::<Vec<_>>()
+            .join("\n"),
+        history
+            .iter()
+            .map(|hash| hash.to_base58_check())
+            .collect::<Vec<_>>()
+            .join("\n"),
+    );
+    std::fs::write(format!("/tmp/tezedge/branch_{}", peer), contents).unwrap();
+    let iter = history
+        .iter()
+        .scan((level, step), |(level, step), hash| {
+            *level -= step.next_step();
+            Some((*level, hash.clone()))
+        })
+        .take(100);
     Some(std::iter::once((branch_current_head_level, branch_current_head_hash)).chain(iter))
 }
