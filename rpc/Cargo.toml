@@ -22,7 +22,7 @@ slog = { version = "2.7", features = ["nested-values", "max_level_trace", "relea
 tokio = { version = "1.12", features = ["time"] }
 tokio-stream = { version = "0.1.8" }
 url = "2.2"
-rusqlite = "0.25.1"
+rusqlite = "0.25.4"
 cached = "0.23"
 bincode = "1.3"
 # local dependencies
